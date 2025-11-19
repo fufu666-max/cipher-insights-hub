@@ -16,6 +16,8 @@ import "./tasks/FHECounter";
 
 const MNEMONIC: string = vars.get("MNEMONIC", "test test test test test test test test test test test junk");
 const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+// Support private key for deployment (from environment variable)
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -49,7 +51,7 @@ const config: HardhatUserConfig = {
       url: "http://localhost:8545",
     },
     sepolia: {
-      accounts: {
+      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : {
         mnemonic: MNEMONIC,
         path: "m/44'/60'/0'/0/",
         count: 10,
@@ -65,7 +67,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.27",
+    version: "0.8.24",
     settings: {
       metadata: {
         // Not including the metadata hash
