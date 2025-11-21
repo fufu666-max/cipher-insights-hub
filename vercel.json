@@ -1,7 +1,7 @@
 {
-  "buildCommand": "bash build-ui.sh",
+  "buildCommand": "cd ui && npm install && npm run build",
   "outputDirectory": "ui/dist",
-  "installCommand": "bash install-ui.sh",
+  "installCommand": "cd ui && npm install",
   "framework": "vite",
   "rewrites": [
     {
