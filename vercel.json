@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm ci --prefix ui && npm run build --prefix ui",
+  "buildCommand": "npm install --prefix ui && npm run build --prefix ui",
   "outputDirectory": "ui/dist",
-  "installCommand": "npm ci --prefix ui",
+  "installCommand": "npm install --prefix ui",
   "framework": null,
   "rewrites": [
     {
