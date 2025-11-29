@@ -39,4 +39,3 @@ function getContractWithValidation(signerOrProvider: any, chainId?: number) {
   return getContract(signerOrProvider, chainId);
 }
 
-
