@@ -11,8 +11,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     headers: {
       // Required by FHEVM SDK for WebAssembly SharedArrayBuffer
-      "Cross-Origin-Embedder-Policy": "require-corp",
-      "Cross-Origin-Opener-Policy": "same-origin",
+      // Note: COEP removed to allow Base Account SDK communication with Coinbase services
+      // COOP set to same-origin-allow-popups for Base Account SDK compatibility
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
     },
   },
   plugins: [
