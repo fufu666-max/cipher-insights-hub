@@ -7,10 +7,10 @@
     "npm": ">=7.0.0"
   },
   "license": "BSD-3-Clause-Clear",
-  "homepage": "https://github.com/zama-ai/fhevm-hardhat-template/README.md",
+  "homepage": "https://github.com/TheresaCarey/cipher-insights-hub/README.md",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zama-ai/fhevm-hardhat-template.git"
+    "url": "git+https://github.com/TheresaCarey/cipher-insights-hub.git"
   },
   "keywords": [
     "fhevm",
