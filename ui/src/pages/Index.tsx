@@ -1,209 +1,218 @@
-import { useState, useEffect } from 'react';
-import { Header } from "@/components/Header";
-import { SurveyCard } from "@/components/SurveyCard";
-import { CreateSurveyDialog } from "@/components/CreateSurveyDialog";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
-import { useSurveyContract, Survey } from '@/hooks/useSurveyContract';
-import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, Lock, BarChart3, Users, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { useAccount } from "wagmi";
+import { useSurveyContract } from "@/hooks/useSurveyContract";
+import { useEffect, useState } from "react";
+
+const features = [
+  {
+    icon: Lock,
+    title: "End-to-End Encryption",
+    description: "All survey responses are encrypted using Fully Homomorphic Encryption (FHE) technology.",
+  },
+  {
+    icon: Shield,
+    title: "Privacy Preserved",
+    description: "Individual responses remain completely anonymous and private throughout the process.",
+  },
+  {
+    icon: BarChart3,
+    title: "Secure Analytics",
+    description: "Aggregate results are computed on encrypted data without exposing individual votes.",
+  },
+  {
+    icon: Users,
+    title: "Decentralized",
+    description: "Built on blockchain technology for transparency and immutability.",
+  },
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+};
 
 const Index = () => {
   const { isConnected } = useAccount();
-  const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
-  const { getSurveyCount, getSurvey, contractDeployed } = useSurveyContract();
-  const [surveys, setSurveys] = useState<{ id: number; data: Survey }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-
-  // Check if user is on wrong network
-  const isWrongNetwork = isConnected && chainId !== 31337 && !contractDeployed;
-
-  // Debug: Log network info
-  useEffect(() => {
-    if (isConnected) {
-      console.log('[Index] Connected - ChainId:', chainId, 'ContractDeployed:', contractDeployed);
-    } else {
-      console.log('[Index] Not connected - Please connect wallet');
-    }
-  }, [isConnected, chainId, contractDeployed]);
-
-  const loadSurveys = async () => {
-    if (!contractDeployed) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const count = await getSurveyCount();
-      if (count === 0) {
-        setSurveys([]);
-        setLoading(false);
-        return;
-      }
-      
-      const loadedSurveys: { id: number; data: Survey }[] = [];
-
-      for (let i = 0; i < count; i++) {
-        const survey = await getSurvey(i);
-        if (survey) {
-          loadedSurveys.push({ id: i, data: survey });
-        }
-      }
-
-      setSurveys(loadedSurveys);
-    } catch (error) {
-      console.error('Error loading surveys:', error);
-      toast.error('Failed to load surveys. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { getSurveyCount, contractDeployed } = useSurveyContract();
+  const [surveyCount, setSurveyCount] = useState(0);
 
   useEffect(() => {
-    if (isConnected && contractDeployed) {
-      loadSurveys();
-    } else {
-      setSurveys([]);
-      setLoading(false);
-    }
-  }, [isConnected, contractDeployed]);
+    const loadCount = async () => {
+      if (contractDeployed) {
+        const count = await getSurveyCount();
+        setSurveyCount(count);
+      }
+    };
+    loadCount();
+  }, [contractDeployed, getSurveyCount]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-secondary/20">
-      <Header />
-      
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold text-foreground mb-2">Product Satisfaction Surveys</h2>
-              <p className="text-muted-foreground">
-                Anonymous product comparison surveys powered by FHE technology
-              </p>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-12">
+      {/* Hero Section */}
+      <motion.section variants={itemVariants} className="text-center py-12">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+        >
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Powered by FHE Technology</span>
+        </motion.div>
+
+        <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            Anonymous Surveys
+          </span>
+          <br />
+          <span className="text-foreground">with Privacy Guaranteed</span>
+        </h1>
+
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          Create and participate in product satisfaction surveys where your responses are encrypted and private. Only
+          aggregate results are revealed.
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-4">
+          {isConnected ? (
+            <>
+              <Link to="/surveys">
+                <Button size="lg" className="gap-2 group">
+                  View Surveys
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link to="/dashboard">
+                <Button size="lg" variant="outline" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <div className="text-center">
+              <p className="text-muted-foreground mb-4">Connect your wallet to get started</p>
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <span>Supports Localhost & Sepolia networks</span>
+              </div>
             </div>
-            {isConnected && contractDeployed && (
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Survey
-              </Button>
-            )}
-          </div>
+          )}
         </div>
+      </motion.section>
 
-        {!isConnected ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">
-              Please connect your wallet to view surveys
-            </p>
-            <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mt-4">
-              <strong>Note:</strong> This app uses Fully Homomorphic Encryption (FHE) for secure,
-              anonymous surveys. All ratings are encrypted before submission and remain private.
-            </div>
-          </div>
-        ) : !contractDeployed ? (
-          <div className="text-center py-12">
-            <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {isWrongNetwork ? 'Wrong Network' : 'Contract Not Deployed'}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {isWrongNetwork 
-                ? `You're connected to Chain ID ${chainId}, but the contract is deployed on localhost (Chain ID: 31337).`
-                : 'The survey contract is not deployed on this network.'}
-            </p>
-            <div className="text-sm text-muted-foreground space-y-2">
-              {isWrongNetwork ? (
-                <>
-                  <p><strong>Current Network:</strong> Chain ID {chainId}</p>
-                  <p><strong>Required Network:</strong> Localhost (Chain ID: 31337)</p>
-                  <div className="mt-4">
-                    <Button 
-                      onClick={() => {
-                        try {
-                          switchChain({ chainId: 31337 });
-                        } catch (error) {
-                          toast.error('Failed to switch network. Please switch manually in your wallet.');
-                        }
-                      }}
-                      className="mb-4"
-                    >
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Switch to Localhost Network
-                    </Button>
-                  </div>
-                  <p className="text-xs mt-4">
-                    <strong>Don't have localhost network?</strong> Add it to your wallet:
-                  </p>
-                  <code className="block bg-muted p-2 rounded mt-2 text-left text-xs">
-                    Network Name: Localhost 8545<br />
-                    RPC URL: http://localhost:8545<br />
-                    Chain ID: 31337<br />
-                    Currency Symbol: ETH
-                  </code>
-                </>
-              ) : (
-                <>
-                  <p><strong>Current Network:</strong> Chain ID {chainId}</p>
-                  <p className="mt-4">To deploy the contract:</p>
-                  <code className="block bg-muted p-2 rounded mt-2 text-left">
-                    # Terminal 1: Start Hardhat node<br />
-                    npx hardhat node<br />
-                    <br />
-                    # Terminal 2: Deploy contract<br />
-                    npx hardhat deploy --network localhost
-                  </code>
-                  <p className="mt-4 text-xs">
-                    <strong>Note:</strong> Make sure you're connected to the localhost network (Chain ID: 31337) in your wallet.
-                  </p>
-                </>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mt-4">
-              <strong>Note:</strong> This app uses Fully Homomorphic Encryption (FHE) for secure,
-              anonymous surveys. All ratings are encrypted before submission and remain private.
-            </div>
-          </div>
-        ) : loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : surveys.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">
-              No surveys found. Create the first one!
-            </p>
-            <Button onClick={() => setShowCreateDialog(true)} className="mt-4">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Survey
-            </Button>
-            <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mt-4">
-              <strong>Note:</strong> This app uses Fully Homomorphic Encryption (FHE) for secure,
-              anonymous surveys. All ratings are encrypted before submission and remain private.
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {surveys.map((survey) => (
-              <SurveyCard
-                key={survey.id}
-                surveyId={survey.id}
-                survey={survey.data}
-                onUpdate={loadSurveys}
-              />
-            ))}
-          </div>
-        )}
-      </main>
+      {/* Stats Section */}
+      {isConnected && contractDeployed && (
+        <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="pt-6 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                className="text-4xl font-bold text-primary mb-2"
+              >
+                {surveyCount}
+              </motion.div>
+              <p className="text-muted-foreground">Active Surveys</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <CardContent className="pt-6 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+                className="text-4xl font-bold text-accent mb-2"
+              >
+                100%
+              </motion.div>
+              <p className="text-muted-foreground">Privacy Protected</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-chart-emerald/10 to-chart-emerald/5 border-chart-emerald/20">
+            <CardContent className="pt-6 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
+                className="text-4xl font-bold text-chart-emerald mb-2"
+              >
+                FHE
+              </motion.div>
+              <p className="text-muted-foreground">Encryption Standard</p>
+            </CardContent>
+          </Card>
+        </motion.section>
+      )}
 
-      <CreateSurveyDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        onSuccess={loadSurveys}
-      />
-    </div>
+      {/* Features Section */}
+      <motion.section variants={itemVariants}>
+        <h2 className="text-2xl font-bold text-center mb-8">Why Choose Cipher Insights?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+            >
+              <Card className="h-full hover:shadow-lg transition-shadow border-border/50 hover:border-primary/30">
+                <CardHeader>
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4"
+                  >
+                    <feature.icon className="h-6 w-6 text-primary" />
+                  </motion.div>
+                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{feature.description}</CardDescription>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* CTA Section */}
+      <motion.section
+        variants={itemVariants}
+        className="text-center py-12 rounded-2xl bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20"
+      >
+        <h2 className="text-2xl font-bold mb-4">Ready to Create Your First Survey?</h2>
+        <p className="text-muted-foreground mb-6">
+          Start collecting anonymous feedback with complete privacy protection.
+        </p>
+        <Link to="/surveys">
+          <Button size="lg" className="gap-2 group">
+            Get Started
+            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
+      </motion.section>
+    </motion.div>
   );
 };
 

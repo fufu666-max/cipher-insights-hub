@@ -11,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.3",
+    "framer-motion": "^11.15.0",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -68,6 +70,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.6.4",
     "@eslint/js": "^9.32.0",
     "@fhevm/mock-utils": "^0.1.0",
     "@tailwindcss/typography": "^0.5.16",
